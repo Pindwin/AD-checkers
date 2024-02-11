@@ -4,6 +4,7 @@ using pindwin.Game;
 using pindwin.Game.FSM;
 using pindwin.Pawns;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace pindwin
 {
@@ -29,7 +30,7 @@ namespace pindwin
             { GameStateType.TargetSelection, new TargetSelection() }
         };
 
-        private void Awake()
+        private void Start()
         {
             _players.AddRange(new IPlayer[] {
                 new LocalPlayer(TileState.White.Team()), 
@@ -77,6 +78,16 @@ namespace pindwin
         {
             _currentPlayer = (_currentPlayer + 1) % _players.Count;
             _players[_currentPlayer].StartTurn(this);
+        }
+
+        public void OnResetClicked()
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+
+        public void OnUndoClicked()
+        {
+            
         }
     }
 }
