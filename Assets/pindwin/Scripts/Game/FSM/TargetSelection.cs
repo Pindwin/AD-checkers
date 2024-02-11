@@ -18,11 +18,10 @@
 						{
 							return;
 						}
-						gameController.Board.MovePawn(selectedTile, tile);
+						gameController.CommitMove(selectedTile, tile, Tile.NullTile);
 						break;
 					case MoveValidity.Capture:
-						gameController.Board.MovePawn(selectedTile, tile);
-						gameController.Board.Capture(capturedTile);
+						gameController.CommitMove(selectedTile, tile, capturedTile);
 						gameController.IsMidCombo = CanContinueCapture(gameController, tile);
 						if (gameController.IsMidCombo)
 						{

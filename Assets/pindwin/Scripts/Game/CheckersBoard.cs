@@ -108,6 +108,11 @@ namespace pindwin.Game
 			pawn.Position = Tile.NullTile;
 			Pawns.Remove(pawn);
 		}
+
+		public void SpawnPawn(Tile position, TileState state)
+		{
+			_board[position] = state;
+		}
 		
 		public void GetAllPossibleMoves(List<PossibleMove> possibleMoves, int team)
 		{
