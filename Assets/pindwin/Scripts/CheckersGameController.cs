@@ -14,6 +14,7 @@ namespace pindwin
         [SerializeField] private PawnView _pawnPrefab;
         
         public CheckersBoard Board { get; private set; }
+        public List<Pawn> Pawns { get; private set; } = new();
         
         private GameState _currentState;
         private CheckersGameFactory _gameFactory;
@@ -40,7 +41,7 @@ namespace pindwin
             });
             
             _gameFactory = new CheckersGameFactory(_pawnPrefab, _boardView, transform);
-            Board = _gameFactory.CreateNewGame();
+            Board = _gameFactory.CreateNewGame(Pawns);
             _boardView.Initialize(OnTileClicked);
             _currentPlayer = Random.Range(0, _players.Count);
             _players[_currentPlayer].StartTurn(this);
@@ -78,12 +79,42 @@ namespace pindwin
         
         public void CommitMove(Tile from, Tile to, Tile capturedTile)
         {
-            MovesHistory.Push(new RecordedMove(CurrentTeam, from, to, capturedTile, capturedTile.IsValid ? Board[capturedTile] : TileState.Empty));
-            Board.MovePawn(from, to);
-            if (capturedTile.IsValid)
+            MovesHistory.Push(
+                new RecordedMove(
+                    CurrentTeam, 
+                    Board[from], 
+                    from, 
+                    to, 
+                    capturedTile, 
+                    capturedTile.IsValid ? Board[capturedTile] : TileState.Empty));
+            
+            TileState resultingState = Board.MakeMove(from, to);
+            UpdatePawn(from, to, resultingState);
+
+            if (capturedTile.IsValid && Board.Capture(capturedTile))
             {
-                Board.Capture(capturedTile);
+                KillPawn(capturedTile);
             }
+        }
+
+        private void UpdatePawn(Tile from, Tile to, TileState resultingState)
+        {
+            Pawn pawn = Pawns.Find(p => p.Position == from);
+            pawn.Position = to;
+            pawn.IsQueen = resultingState.IsQueen();
+        }
+        
+        private void KillPawn(Tile capturedTile)
+        {
+            Pawn pawn = Pawns.Find(p => p.Position == capturedTile);
+            Pawns.Remove(pawn);
+            pawn.IsDead = true;
+            pawn.Position = Tile.NullTile;
+        }
+
+        private void SpawnPawn(Tile position, TileState state)
+        {
+            Pawns.Add(new Pawn(state, position, _pawnPrefab, _boardView, transform));
         }
 
         public void UndoLastMove()
@@ -94,11 +125,13 @@ namespace pindwin
             }
 
             RecordedMove move = MovesHistory.Pop();
-            Board.MovePawn(move.To, move.From);
+            Board.MakeMove(move.To, move.From);
+            Board.ForceState(move.From, move.OriginalState);
+            UpdatePawn(move.To, move.From, move.OriginalState);
             if (move.Capture.IsValid)
             {
-                Board.SpawnPawn(move.Capture, move.CaptureState);
-                Board.Pawns.Add(new Pawn(move.CaptureState, move.Capture, _pawnPrefab, _boardView, transform));
+                Board.ForceState(move.Capture, move.CaptureState);
+                SpawnPawn(move.Capture, move.CaptureState);
             }
         }
 

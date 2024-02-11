@@ -2,18 +2,20 @@
 {
 	public readonly struct RecordedMove
 	{
-		public RecordedMove(int team, Tile from, Tile to, Tile capture, TileState captureState)
+		public RecordedMove(int team, TileState originalState, Tile from, Tile to, Tile capture, TileState captureState)
 		{
 			Team = team;
+			OriginalState = originalState;
 			From = from;
 			To = to;
 			Capture = capture;
 			CaptureState = captureState;
 		}
-		public readonly int Team { get; }
-		public readonly Tile From { get; }
-		public readonly Tile To { get; }
-		public readonly Tile Capture { get; }
-		public readonly TileState CaptureState { get; }
+		public int Team { get; }
+		public TileState OriginalState { get; }
+		public Tile From { get; }
+		public Tile To { get; }
+		public Tile Capture { get; }
+		public TileState CaptureState { get; }
 	}
 }

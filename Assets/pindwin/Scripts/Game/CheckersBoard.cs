@@ -8,7 +8,6 @@ namespace pindwin.Game
 	{
 		private readonly TileState[] _board;
 		public Tile SelectedTile { get; private set; } = Tile.NullTile;
-		public List<Pawn> Pawns { get; private set; } = new();
 		public int PlayerTeam { get; } = TileState.White.Team();
 		
 		public TileState this[Tile tile] => _board[tile];
@@ -85,31 +84,36 @@ namespace pindwin.Game
 			return capturedTile.IsNull ? MoveValidity.Valid : MoveValidity.Capture;
 		}
 
-		public void MovePawn(Tile selectedTile, Tile tile)
+		public TileState MakeMove(Tile from, Tile to)
 		{
-			_board[tile] = _board[selectedTile];
-			_board[selectedTile] = TileState.Empty;
-			Pawn pawn = Pawns.Find(p => p.Position == selectedTile);
-			Debug.Assert(pawn != null);
-			pawn.Position = tile;
-			if ((tile + new Vector2Int(0, pawn.Team)).IsNull)
+			if (from.IsNull)
 			{
-				_board[tile] |= TileState.Promoted;
-				pawn.IsQueen = true;
+				return TileState.Empty;
 			}
+			
+			int team = _board[from].Team();
+			_board[to] = _board[from];
+			_board[from] = TileState.Empty;
+			if ((to + new Vector2Int(0, team)).IsNull)
+			{
+				_board[to] |= TileState.Promoted;
+			}
+
+			return _board[to];
 		}
 		
-		public void Capture(Tile capturedTile)
+		public bool Capture(Tile capturedTile)
 		{
+			if (capturedTile.IsNull)
+			{
+				return false;
+			}
+			
 			_board[capturedTile] = TileState.Empty;
-			Pawn pawn = Pawns.Find(p => p.Position == capturedTile);
-			Debug.Assert(pawn != null);
-			pawn.IsDead = true;
-			pawn.Position = Tile.NullTile;
-			Pawns.Remove(pawn);
+			return true;
 		}
 
-		public void SpawnPawn(Tile position, TileState state)
+		public void ForceState(Tile position, TileState state)
 		{
 			_board[position] = state;
 		}
@@ -122,14 +126,15 @@ namespace pindwin.Game
 		
 		public void GetAllPossibleMoves(List<PossibleMove> possibleMoves, int team, ref bool kill)
 		{
-			foreach (Pawn pawn in Pawns)
+			for (int i = 0; i < _board.Length; i++)
 			{
-				if (pawn.Team != team)
+				TileState tileState = _board[i];
+				if (tileState.IsEmpty() || tileState.Team() != team)
 				{
 					continue;
 				}
-				
-				GetPossibleMoves(pawn.Position, possibleMoves, ref kill);
+
+				GetPossibleMoves(i, possibleMoves, ref kill);
 			}
 		}
 

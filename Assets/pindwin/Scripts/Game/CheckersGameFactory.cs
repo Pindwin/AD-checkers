@@ -10,20 +10,18 @@ namespace pindwin.Game
 		private readonly PawnView _pawnPrefab;
 		private readonly BoardView _boardView;
 		private readonly Transform _pawnsRoot;
-		private readonly List<Pawn> _pawnsBuffer;
 
 		public CheckersGameFactory(PawnView pawnPrefab, BoardView boardView, Transform pawnsRoot)
 		{
 			_pawnPrefab = pawnPrefab;
 			_boardView = boardView;
 			_pawnsRoot = pawnsRoot;
-			_pawnsBuffer = new List<Pawn>();
 		}
 		
-		public CheckersBoard CreateNewGame()
+		public CheckersBoard CreateNewGame(List<Pawn> pawns)
 		{
 			var gameState = new TileState[64];
-			_pawnsBuffer.Clear();
+			pawns.Clear();
 			for (int y = 0; y < 8; y++)
 			{
 				for (int x = 0; x < 8; x++)
@@ -39,7 +37,7 @@ namespace pindwin.Game
 							{
 								state |= TileState.White;
 							}
-							_pawnsBuffer.Add(new Pawn(state, t, _pawnPrefab, _boardView, _pawnsRoot));
+							pawns.Add(new Pawn(state, t, _pawnPrefab, _boardView, _pawnsRoot));
 						}
 						
 						gameState[t] = state;
@@ -47,9 +45,7 @@ namespace pindwin.Game
 				}
 			}
 
-			var game = new CheckersBoard(gameState);
-			game.Pawns.AddRange(_pawnsBuffer);
-			return game;
+			return new CheckersBoard(gameState);
 		}
 	}
 }
