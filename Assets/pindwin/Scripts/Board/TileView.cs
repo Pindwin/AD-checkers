@@ -1,7 +1,8 @@
-﻿using pindwin.Scripts.Game;
+﻿using System;
+using pindwin.Game;
 using UnityEngine;
 
-namespace pindwin.Scripts.Board
+namespace pindwin.Board
 {
 	[RequireComponent(typeof(SpriteRenderer))]
 	public class TileView : MonoBehaviour
@@ -9,8 +10,9 @@ namespace pindwin.Scripts.Board
 		[SerializeField] private Color _selectedColor;
 		
 		private SpriteRenderer _spriteRenderer;
-		private ClickTileCommand _clickTileCommand;
+		private Action<Tile> _clickTileCommand;
 		private Tile _boardCoord;
+		public Vector2Int BoardCoord;
 
 		public bool Selected
 		{
@@ -22,15 +24,16 @@ namespace pindwin.Scripts.Board
 			_spriteRenderer = GetComponent<SpriteRenderer>();
 		}
 
-		public void Initialize(Tile boardCoord, ClickTileCommand clickTileCommand)
+		public void Initialize(Tile boardCoord, Action<Tile> clickTileCommand)
 		{
 			_boardCoord = boardCoord;
 			_clickTileCommand = clickTileCommand;
+			BoardCoord = new Vector2Int(boardCoord.X, boardCoord.Y);
 		}
 		
 		public void OnMouseDown()
 		{
-			_clickTileCommand?.Execute(_boardCoord);
+			_clickTileCommand?.Invoke(_boardCoord);
 		}
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
-namespace pindwin.Scripts.Game
+namespace pindwin.Game
 {
 	public readonly struct Tile : IEquatable<Tile>
 	{
@@ -13,7 +14,10 @@ namespace pindwin.Scripts.Game
 		public int X { get; }
 		public int Y { get; }
 		
-		public bool IsBlack => (X + Y) % 2 == 1;
+		public static readonly Tile NullTile = new Tile(-1, -1);
+
+		public bool IsNull => X < 0 || Y < 0;
+		public bool IsBlack => (X + Y) % 2 == 0;
 
 		public bool Equals(Tile other)
 		{
@@ -32,5 +36,7 @@ namespace pindwin.Scripts.Game
 		
 		public static implicit operator int(Tile t) => t.Y * 8 + t.X;
 		public static implicit operator Tile(int i) => new Tile(i % 8, i / 8);
+		public static Vector2Int operator -(Tile a, Tile b) => new Vector2Int(a.X - b.X, a.Y - b.Y);
+		public static Tile operator +(Tile a, Vector2Int b) => new Tile(a.X + b.x, a.Y + b.y);
 	}
 }

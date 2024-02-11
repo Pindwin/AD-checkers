@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using pindwin.Scripts.Board;
-using pindwin.Scripts.Pawns;
+using pindwin.Board;
+using pindwin.Pawns;
 using UnityEngine;
 
-namespace pindwin.Scripts.Game
+namespace pindwin.Game
 {
 	public class CheckersGameFactory
 	{
@@ -37,7 +37,7 @@ namespace pindwin.Scripts.Game
 							state |= TileState.Pawn;
 							if (y < 3)
 							{
-								state = TileState.White;
+								state |= TileState.White;
 							}
 							_pawnsBuffer.Add(new Pawn(state, t, _pawnPrefab, _boardView, _pawnsRoot));
 						}

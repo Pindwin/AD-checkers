@@ -1,9 +1,10 @@
 ﻿using System;
-using pindwin.Scripts.Game;
+using pindwin.Game;
 using UnityEditor;
 using UnityEngine;
+using IndexOutOfRangeException = System.IndexOutOfRangeException;
 
-namespace pindwin.Scripts.Board
+namespace pindwin.Board
 {
 	public class RowView : MonoBehaviour
 	{
@@ -21,19 +22,21 @@ namespace pindwin.Scripts.Board
 
 		public TileView GetTileByBoardCoord(int x)
 		{
-			if (_isOdd)
-			{
-				x += 1;
-			}
-			
 			return _tiles[x / 2];
 		}
 		
-		public void Initialize(ClickTileCommand clickTileCommand)
+		public void Initialize(Action<Tile> clickTileCommand)
 		{
 			for (int i = 0; i < _tiles.Length; i++)
 			{
-				_tiles[i].Initialize(new Tile(i * 2 + (_isOdd ? 1 : 0), _rowIndex), clickTileCommand);
+				try
+				{
+					_tiles[i].Initialize(new Tile(i * 2 + (_isOdd ? 1 : 0), _rowIndex), clickTileCommand);
+				}
+				catch (IndexOutOfRangeException)
+				{
+					throw;
+				}
 			}
 		}
 		

@@ -1,8 +1,7 @@
-﻿using System;
-using pindwin.Scripts.Board;
+﻿using pindwin.Board;
 using UnityEngine;
 
-namespace pindwin.Scripts.Pawns
+namespace pindwin.Pawns
 {
 	[RequireComponent(typeof(SpriteRenderer))]
 	public class PawnView : MonoBehaviour
@@ -20,7 +19,7 @@ namespace pindwin.Scripts.Pawns
 		public void Refresh(Pawn pawn, BoardView boardView)
 		{
 			transform.position = boardView.GetTileByBoardCoord(pawn.Position.X, pawn.Position.Y).transform.position;
-			_spriteRenderer.sprite = pawn.IsBlack ? _blackSprite : _whiteSprite;
+			_spriteRenderer.sprite = pawn.IsWhite ? _whiteSprite : _blackSprite;
 			//todo set queen sprite
 		}
 	}

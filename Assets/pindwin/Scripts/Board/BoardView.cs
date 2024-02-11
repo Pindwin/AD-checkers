@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
+using pindwin.Game;
+using UnityEngine;
 
-namespace pindwin.Scripts.Board
+namespace pindwin.Board
 {
 	public class BoardView : MonoBehaviour
 	{
@@ -19,7 +21,7 @@ namespace pindwin.Scripts.Board
 			return _rows[y].GetTileByBoardCoord(x);
 		}
 
-		public void Initialize(ClickTileCommand clickTileCommand)
+		public void Initialize(Action<Tile> clickTileCommand)
 		{
 			foreach (RowView rowView in _rows)
 			{

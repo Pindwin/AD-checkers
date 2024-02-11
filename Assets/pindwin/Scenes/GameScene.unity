@@ -365,6 +365,18 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2105592756150153987, guid: f3703dae98dc8a348ad6d32586a86828, type: 3}
+      propertyPath: _isOdd
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2105592756508582441, guid: f3703dae98dc8a348ad6d32586a86828, type: 3}
+      propertyPath: _isOdd
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2105592756626340897, guid: f3703dae98dc8a348ad6d32586a86828, type: 3}
+      propertyPath: _isOdd
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3105876423508063282, guid: f3703dae98dc8a348ad6d32586a86828, type: 3}
       propertyPath: m_Name
       value: Board
@@ -412,6 +424,10 @@ PrefabInstance:
     - target: {fileID: 3105876423508063292, guid: f3703dae98dc8a348ad6d32586a86828, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5109999123787364682, guid: f3703dae98dc8a348ad6d32586a86828, type: 3}
+      propertyPath: _isOdd
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f3703dae98dc8a348ad6d32586a86828, type: 3}
