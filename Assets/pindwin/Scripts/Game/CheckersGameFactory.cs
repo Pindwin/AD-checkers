@@ -20,7 +20,7 @@ namespace pindwin.Game
 			_pawnsBuffer = new List<Pawn>();
 		}
 		
-		public CheckersGame CreateNewGame()
+		public CheckersBoard CreateNewGame()
 		{
 			var gameState = new TileState[64];
 			_pawnsBuffer.Clear();
@@ -47,7 +47,7 @@ namespace pindwin.Game
 				}
 			}
 
-			var game = new CheckersGame(gameState);
+			var game = new CheckersBoard(gameState);
 			game.Pawns.AddRange(_pawnsBuffer);
 			return game;
 		}

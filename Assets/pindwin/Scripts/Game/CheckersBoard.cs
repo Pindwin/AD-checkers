@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace pindwin.Game
 {
-	public class CheckersGame
+	public class CheckersBoard
 	{
 		private readonly TileState[] _board;
 		public Tile SelectedTile { get; private set; } = Tile.NullTile;
@@ -13,7 +13,7 @@ namespace pindwin.Game
 		
 		public TileState this[Tile tile] => _board[tile];
 
-		public CheckersGame(TileState[] gameState)
+		public CheckersBoard(TileState[] gameState)
 		{
 			Debug.Assert(gameState.Length == 64);
 			_board = gameState;
@@ -32,7 +32,7 @@ namespace pindwin.Game
 			}
 		}
 		
-		public MoveValidity CanMoveTo(Tile from, Tile to, out Tile capturedTile)
+		public MoveValidity IsMoveValid(Tile from, Tile to, out Tile capturedTile)
 		{
 			capturedTile = Tile.NullTile;
 			if (from.IsNull || to.IsNull)
@@ -45,32 +45,6 @@ namespace pindwin.Game
 				return MoveValidity.Invalid;
 			}
 
-			TileState fromState = _board[from];
-			if (_board[from].IsQueen())
-			{
-				return CanQueenMoveTo(from, to, out capturedTile);
-			}
-
-			Vector2Int delta = to - from;
-			if (Mathf.Abs(delta.x) == 1 && delta.y == fromState.Team())
-			{
-				return MoveValidity.Valid;
-			}
-
-			if (Mathf.Abs(delta.x) == 2 
-				&& Mathf.Abs(delta.y) == 2 
-				&& _board[from + delta / 2].Team() != _board[from].Team())
-			{
-				capturedTile = from + delta / 2;
-				return MoveValidity.Capture;
-			}
-
-			return MoveValidity.Invalid;
-		}
-
-		private MoveValidity CanQueenMoveTo(Tile from, Tile to, out Tile capturedTile)
-		{
-			capturedTile = Tile.NullTile;
 			Vector2Int delta = to - from;
 			int distance = Mathf.Abs(delta.x);
 			if (distance != Mathf.Abs(delta.y))
@@ -82,12 +56,18 @@ namespace pindwin.Game
 			{
 				return MoveValidity.Valid;
 			}
-
-			var fromState = _board[from];
+			
+			TileState fromState = _board[from];
+			int moveRange = fromState.IsQueen() ? 8 : 2;
+			if (distance > moveRange)
+			{
+				return MoveValidity.Invalid;
+			}
+			
 			int xSign = Mathf.RoundToInt(Mathf.Sign(delta.x));
 			int ySign = Mathf.RoundToInt(Mathf.Sign(delta.y));
 
-			for (int i = 2; i < distance; i++)
+			for (int i = 1; i < distance; i++)
 			{
 				Tile tile = from + new Vector2Int(i * xSign, i * ySign);
 				TileState tileState = _board[tile];
@@ -129,7 +109,13 @@ namespace pindwin.Game
 			Pawns.Remove(pawn);
 		}
 		
-		public void GetAllPossibleMoves(List<PossibleMove> moves, List<PossibleCapture> captures, int team)
+		public void GetAllPossibleMoves(List<PossibleMove> possibleMoves, int team)
+		{
+			bool kill = false;
+			GetAllPossibleMoves(possibleMoves, team, ref kill);
+		}
+		
+		public void GetAllPossibleMoves(List<PossibleMove> possibleMoves, int team, ref bool kill)
 		{
 			foreach (Pawn pawn in Pawns)
 			{
@@ -138,65 +124,88 @@ namespace pindwin.Game
 					continue;
 				}
 				
-				GetPossibleMoves(pawn.Position, moves, captures);
+				GetPossibleMoves(pawn.Position, possibleMoves, ref kill);
 			}
 		}
 
-		public void GetPossibleMoves(Tile from, List<PossibleMove> moves, List<PossibleCapture> captures)
+		public void GetPossibleMoves(Tile origin, List<PossibleMove> moves, ref bool kill)
 		{
-			TileState state = _board[from];
+			TileState state = _board[origin];
 			
 			if (state == TileState.Empty)
 			{
 				return;
 			}
 
-			int maxRange = state.IsQueen() ? 8 : 2;
-			GetMovesInDirection(-1);
-			GetMovesInDirection(1);
-			GetMovesInDirection(-1, -1, state.IsQueen());
-			GetMovesInDirection(1, -1, state.IsQueen());
-			return;
+			int range = state.IsQueen() ? 8 : 2;
+			int team = state.Team();
+			bool isPawn = state.IsQueen() == false;
+			GetMovesInDirection(-1, 1, kill, range, origin, team, ref kill, moves);
+			GetMovesInDirection(1, 1, kill, range, origin, team, ref kill, moves);
+			GetMovesInDirection(-1, -1, kill || isPawn, range, origin, team, ref kill, moves);
+			GetMovesInDirection(1, -1, kill || isPawn, range, origin, team, ref kill, moves);
+		}
 
-			void GetMovesInDirection(int horizontalDirection, int verticalDirection = 1, bool allowNonCaptures = true)
+		private void GetMovesInDirection(
+			int yDir, 
+			int xDir, 
+			bool blockNonCaptures, 
+			int maxRange, 
+			Tile origin, 
+			int team, 
+			ref bool foundCapture, 
+			List<PossibleMove> moves)
+		{
+			Tile captureTile = Tile.NullTile;
+			for (int i = yDir; Mathf.Abs(i) <= maxRange; i += yDir)
 			{
-				Tile captureTile = Tile.NullTile;
-				for (int i = horizontalDirection; Mathf.Abs(i) <= maxRange; i += horizontalDirection)
+				Tile to = origin + new Vector2Int(i, Mathf.Abs(i) * team * xDir);
+				if (to.IsNull)
 				{
-					Tile to = from + new Vector2Int(i, Mathf.Abs(i) * state.Team() * verticalDirection);
-					if (to.IsNull)
-					{
-						break;
-					}
+					//out of board
+					break;
+				}
 
-					if (_board[to].IsEmpty())
+				if (_board[to].IsEmpty())
+				{
+					if (captureTile.IsNull)
 					{
-						if (captureTile.IsNull)
+						if (Mathf.Abs(i) == maxRange)
 						{
-							if (Mathf.Abs(i) < maxRange && allowNonCaptures)
-							{
-								moves.Add(new PossibleMove(from, to));
-							}
-							else
-							{
-								break;
-							}
+							//only captures allowed at max range
+							break;
 						}
-						else
+							
+						if (foundCapture || blockNonCaptures)
 						{
-							captures.Add(new PossibleCapture(from, to, captureTile, false));
-							//todo establish follow ups
+							//not interested in non-captures at this point
+							continue;
 						}
-					}
-					else if (captureTile.IsNull && _board[to].Team() != state.Team())
-					{
-						captureTile = to;
+							
+						moves.Add(new PossibleMove(origin, to, Tile.NullTile, false));
 					}
 					else
 					{
-						break;
+						if (foundCapture == false)
+						{
+							//first capture found - not interested in regular moves anymore
+							moves.Clear();
+							foundCapture = true;
+						}
+						moves.Add(new PossibleMove(origin, to, captureTile, false));
+						//todo establish follow ups
 					}
+					continue;
 				}
+					
+				if (captureTile.IsNull && _board[to].Team() != team)
+				{
+					//first enemy piece found - it's a potential capture
+					captureTile = to;
+					continue;
+				}
+					
+				break;
 			}
 		}
 	}

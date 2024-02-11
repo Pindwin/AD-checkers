@@ -12,12 +12,15 @@ namespace pindwin
         [SerializeField] private BoardView _boardView;
         [SerializeField] private PawnView _pawnPrefab;
         
-        public CheckersGame Game { get; private set; }
+        public CheckersBoard Board { get; private set; }
         
         private GameState _currentState;
         private CheckersGameFactory _gameFactory;
         private int _currentPlayer; 
         public int CurrentTeam => _players[_currentPlayer].Team;
+        public List<PossibleMove> PossibleMovesBuffer { get; } = new();
+        public bool IsMidCombo { get; set; }
+
         private readonly List<IPlayer> _players = new();
         
         private readonly Dictionary<GameStateType, GameState> _states = new()
@@ -32,12 +35,9 @@ namespace pindwin
                 new LocalPlayer(TileState.White.Team()), 
                 new AIPlayer(TileState.White.Team() * -1, this)
             });
-        }
-    
-        private void Start()
-        {
+            
             _gameFactory = new CheckersGameFactory(_pawnPrefab, _boardView, transform);
-            Game = _gameFactory.CreateNewGame();
+            Board = _gameFactory.CreateNewGame();
             _boardView.Initialize(OnTileClicked);
             _currentPlayer = Random.Range(0, _players.Count);
             _players[_currentPlayer].StartTurn(this);
@@ -61,12 +61,12 @@ namespace pindwin
 
         public void SetSelectedTile(Tile tile, bool isSelected)
         {
-            if (Game.SelectedTile.IsNull == false)
+            if (Board.SelectedTile.IsNull == false)
             {
-                Tile t = Game.SelectedTile;
+                Tile t = Board.SelectedTile;
                 _boardView.GetTileByBoardCoord(t.X, t.Y).Selected = false;
             }
-            Game.SetSelectedTile(tile, isSelected);
+            Board.SetSelectedTile(tile, isSelected);
             if (tile.IsNull == false)
             {
                 _boardView.GetTileByBoardCoord(tile.X, tile.Y).Selected = isSelected;

@@ -17,24 +17,17 @@ namespace pindwin
 		public int Team { get; }
 		
 		private readonly MonoBehaviour _coroutineRunner;
-		private readonly List<PossibleCapture> _possibleCaptures = new();
-		private readonly List<PossibleMove> _possibleMoves = new();
 		
 		public void StartTurn(CheckersGameController gameController)
 		{
-			gameController.SetSelectedTile(gameController.Game.SelectedTile, false);
-			_possibleMoves.Clear();
-			_possibleCaptures.Clear();
-			gameController.Game.GetAllPossibleMoves(_possibleMoves, _possibleCaptures, gameController.Game.PlayerTeam * -1);
-			if (_possibleCaptures.Count > 0)
+			gameController.SetSelectedTile(gameController.Board.SelectedTile, false);
+			List<PossibleMove> moves = gameController.PossibleMovesBuffer;
+			moves.Clear();
+			gameController.Board.GetAllPossibleMoves(moves, gameController.Board.PlayerTeam * -1);
+			if (moves.Count > 0)
 			{
-				PossibleCapture capture = _possibleCaptures[Random.Range(0, _possibleCaptures.Count)];
+				PossibleMove capture = moves[Random.Range(0, moves.Count)];
 				_coroutineRunner.StartCoroutine(PlayTurn(capture.From, capture.To, gameController));
-			}
-			else if (_possibleMoves.Count > 0)
-			{
-				PossibleMove move = _possibleMoves[Random.Range(0, _possibleMoves.Count)];
-				_coroutineRunner.StartCoroutine(PlayTurn(move.From, move.To, gameController));
 			}
 			else
 			{
@@ -48,6 +41,17 @@ namespace pindwin
 			gameController.GoToState(GameStateType.PawnSelection);
 			gameController.OnTileClicked(from);
 			gameController.OnTileClicked(to);
+			if (gameController.IsMidCombo)
+			{
+				List<PossibleMove> moves = gameController.PossibleMovesBuffer;
+				bool killsOnly = true;
+				gameController.Board.GetPossibleMoves(to, moves, ref killsOnly);
+				if (moves.Count > 0)
+				{
+					PossibleMove capture = moves[Random.Range(0, moves.Count)];
+					_coroutineRunner.StartCoroutine(PlayTurn(capture.From, capture.To, gameController));
+				}
+			}
 		}
 	}
 }
