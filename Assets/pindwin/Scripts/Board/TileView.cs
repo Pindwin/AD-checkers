@@ -1,5 +1,4 @@
-﻿using System;
-using pindwin.Scripts.Game;
+﻿using pindwin.Scripts.Game;
 using UnityEngine;
 
 namespace pindwin.Scripts.Board

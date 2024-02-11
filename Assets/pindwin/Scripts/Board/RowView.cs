@@ -1,5 +1,6 @@
 ﻿using System;
 using pindwin.Scripts.Game;
+using UnityEditor;
 using UnityEngine;
 
 namespace pindwin.Scripts.Board
@@ -34,6 +35,15 @@ namespace pindwin.Scripts.Board
 			{
 				_tiles[i].Initialize(new Tile(i * 2 + (_isOdd ? 1 : 0), _rowIndex), clickTileCommand);
 			}
+		}
+		
+		[ContextMenu("Assign Tiles")]
+		private void DoSomething()
+		{
+			_tiles = GetComponentsInChildren<TileView>();
+			#if UNITY_EDITOR
+			EditorUtility.SetDirty(this);
+			#endif
 		}
 	}
 }
