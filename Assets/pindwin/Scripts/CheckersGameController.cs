@@ -61,13 +61,13 @@ namespace pindwin
 
         public void SetSelectedTile(Tile tile, bool isSelected)
         {
-            if (Board.SelectedTile.IsNull == false)
+            if (Board.SelectedTile.IsValid)
             {
                 Tile t = Board.SelectedTile;
                 _boardView.GetTileByBoardCoord(t.X, t.Y).Selected = false;
             }
             Board.SetSelectedTile(tile, isSelected);
-            if (tile.IsNull == false)
+            if (tile.IsValid)
             {
                 _boardView.GetTileByBoardCoord(tile.X, tile.Y).Selected = isSelected;
             }

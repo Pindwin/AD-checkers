@@ -21,7 +21,7 @@
 		private static void TryGoToTargetSelection(CheckersGameController gameController, Tile tile)
 		{
 			CheckersBoard board = gameController.Board;
-			if (tile.IsNull == false)
+			if (tile.IsValid)
 			{
 				bool isValidTeam = board[tile].Team() == gameController.CurrentTeam;
 				gameController.SetSelectedTile(tile, isValidTeam);

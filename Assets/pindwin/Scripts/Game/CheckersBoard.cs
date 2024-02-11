@@ -21,12 +21,12 @@ namespace pindwin.Game
 
 		public void SetSelectedTile(Tile tile, bool isSelected)
 		{
-			if (SelectedTile.IsNull == false)
+			if (SelectedTile.IsValid)
 			{
 				_board[SelectedTile] &= ~TileState.Selected;
 			}
 			SelectedTile = isSelected ? tile : Tile.NullTile;
-			if (SelectedTile.IsNull == false)
+			if (SelectedTile.IsValid)
 			{
 				_board[SelectedTile] |= TileState.Selected;
 			}
@@ -73,7 +73,7 @@ namespace pindwin.Game
 				TileState tileState = _board[tile];
 				if (tileState.IsEmpty() == false)
 				{
-					if (capturedTile.IsNull == false || tileState.Team() == fromState.Team())
+					if (capturedTile.IsValid || tileState.Team() == fromState.Team())
 					{
 						return MoveValidity.Invalid;
 					}

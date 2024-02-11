@@ -14,9 +14,10 @@ namespace pindwin.Game
 		public int X { get; }
 		public int Y { get; }
 		
-		public static readonly Tile NullTile = new Tile(-1, -1);
+		public static readonly Tile NullTile = new (-1, -1);
 
 		public bool IsNull => X < 0 || Y < 0 || X > 7 || Y > 7;
+		public bool IsValid => IsNull == false;
 		public bool IsBlack => (X + Y) % 2 == 0;
 
 		public bool Equals(Tile other)
