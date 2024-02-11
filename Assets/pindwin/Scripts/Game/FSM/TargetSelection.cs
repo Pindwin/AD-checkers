@@ -1,14 +1,9 @@
-﻿using UnityEngine;
-
-namespace pindwin.Game.FSM
+﻿namespace pindwin.Game.FSM
 {
 	public class TargetSelection : GameState
 	{
-		public override GameStateType Type => GameStateType.TargetSelection;
 		public override void OnEnter(CheckersGameController gameController)
-		{
-			Debug.Log(Type);
-		}
+		{ }
 
 		public override void OnTileClicked(CheckersGameController gameController, Tile tile)
 		{

@@ -1,14 +1,9 @@
-﻿using UnityEngine;
-
-namespace pindwin.Game.FSM
+﻿namespace pindwin.Game.FSM
 {
 	public class PawnSelection : GameState
 	{
-		public override GameStateType Type => GameStateType.PawnSelection;
-
 		public override void OnEnter(CheckersGameController gameController)
 		{
-			Debug.Log(Type);
 			TryGoToTargetSelection(gameController, gameController.Game.SelectedTile);
 		}
 

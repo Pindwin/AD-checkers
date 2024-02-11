@@ -8,8 +8,6 @@ namespace pindwin.Game.FSM
 		private readonly List<PossibleCapture> _possibleCaptures = new();
 		private readonly List<PossibleMove> _possibleMoves = new();
 		
-		public override GameStateType Type => GameStateType.ComputerTurn;
-		
 		public override void OnEnter(CheckersGameController gameController)
 		{
 			gameController.SetSelectedTile(gameController.Game.SelectedTile, false);
