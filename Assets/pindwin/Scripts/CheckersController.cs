@@ -10,10 +10,13 @@ public class CheckersController : MonoBehaviour
     
     private CheckersGameFactory _gameFactory;
     private CheckersGame _game;
+    private ClickTileCommand _clickTileCommand;
     
     private void Start()
     {
         _gameFactory = new CheckersGameFactory(_pawnPrefab, _boardView, transform);
         _game = _gameFactory.CreateNewGame();
+        _clickTileCommand = new ClickTileCommand(_game, _boardView);
+        _boardView.Initialize(_clickTileCommand);
     }
 }

@@ -31,18 +31,23 @@ namespace pindwin.Scripts.Game
 					var t = new Tile(x, y);
 					if (t.IsBlack)
 					{
-						var state = y < 3 ? TileState.WhitePawn : y > 4 ? TileState.BlackPawn : TileState.Empty;
-						if (state == TileState.Empty)
+						var state = TileState.Empty;
+						if (y < 3 || y > 4)
 						{
-							continue;
+							state |= TileState.Pawn;
+							if (y < 3)
+							{
+								state = TileState.White;
+							}
+							_pawnsBuffer.Add(new Pawn(state, t, _pawnPrefab, _boardView, _pawnsRoot));
 						}
+						
 						gameState[t] = state;
-						_pawnsBuffer.Add(new Pawn(state, t, _pawnPrefab, _boardView, _pawnsRoot));
 					}
 				}
 			}
 
-			var game = new CheckersGame(gameState, _boardView);
+			var game = new CheckersGame(gameState);
 			game.Pawns.AddRange(_pawnsBuffer);
 			return game;
 		}

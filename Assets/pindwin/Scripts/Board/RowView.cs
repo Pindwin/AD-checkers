@@ -1,4 +1,5 @@
 ﻿using System;
+using pindwin.Scripts.Game;
 using UnityEngine;
 
 namespace pindwin.Scripts.Board
@@ -25,6 +26,14 @@ namespace pindwin.Scripts.Board
 			}
 			
 			return _tiles[x / 2];
+		}
+		
+		public void Initialize(ClickTileCommand clickTileCommand)
+		{
+			for (int i = 0; i < _tiles.Length; i++)
+			{
+				_tiles[i].Initialize(new Tile(i * 2 + (_isOdd ? 1 : 0), _rowIndex), clickTileCommand);
+			}
 		}
 	}
 }

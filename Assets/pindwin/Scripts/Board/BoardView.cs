@@ -18,5 +18,13 @@ namespace pindwin.Scripts.Board
 			
 			return _rows[y].GetTileByBoardCoord(x);
 		}
+
+		public void Initialize(ClickTileCommand clickTileCommand)
+		{
+			foreach (RowView rowView in _rows)
+			{
+				rowView.Initialize(clickTileCommand);
+			}
+		}
 	}
 }
