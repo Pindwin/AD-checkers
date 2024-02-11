@@ -124,18 +124,18 @@ namespace pindwin.Game
 			}
 
 			int maxRange = state.IsQueen() ? 8 : 2;
-			Tile captureTile = Tile.NullTile;
-			GetMovesInDirection(-1, 1);
-			GetMovesInDirection(1, 1);
-			//GetMovesInDirection(-1, -1, false);
-			//GetMovesInDirection(1, -1, false);
+			GetMovesInDirection(-1);
+			GetMovesInDirection(1);
+			GetMovesInDirection(-1, -1, state.IsQueen());
+			GetMovesInDirection(1, -1, state.IsQueen());
 			return;
 
-			void GetMovesInDirection(int horizontalDirection, int verticalDirection, bool allowNonCaptures = true)
+			void GetMovesInDirection(int horizontalDirection, int verticalDirection = 1, bool allowNonCaptures = true)
 			{
+				Tile captureTile = Tile.NullTile;
 				for (int i = horizontalDirection; Mathf.Abs(i) <= maxRange; i += horizontalDirection)
 				{
-					Tile to = from + new Vector2Int(i, i * state.Team() * verticalDirection);
+					Tile to = from + new Vector2Int(i, Mathf.Abs(i) * state.Team() * verticalDirection);
 					if (to.IsNull)
 					{
 						break;
@@ -145,9 +145,13 @@ namespace pindwin.Game
 					{
 						if (captureTile.IsNull)
 						{
-							if (allowNonCaptures && Mathf.Abs(i) < maxRange)
+							if (Mathf.Abs(i) < maxRange && allowNonCaptures)
 							{
 								moves.Add(new PossibleMove(from, to));
+							}
+							else
+							{
+								break;
 							}
 						}
 						else
