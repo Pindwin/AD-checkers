@@ -10,9 +10,19 @@ namespace pindwin.Pawns
 		private readonly BoardView _boardView;
 		private Tile _position;
 		private bool _isDead;
+		private bool _isQueen;
 
 		public int Team { get; }
-		public bool IsQueen { get; set; }
+
+		public bool IsQueen
+		{
+			get => _isQueen;
+			set
+			{
+				_isQueen = value;
+				_pawnView.Refresh(this, _boardView);
+			}
+		}
 
 		public bool IsDead
 		{

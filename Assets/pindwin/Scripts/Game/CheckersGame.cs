@@ -56,7 +56,7 @@ namespace pindwin.Game
 			TileState fromState = _board[from];
 			if (_board[from].IsQueen())
 			{
-				return CanQueenMoveTo(from, to);
+				return CanQueenMoveTo(from, to, out capturedTile);
 			}
 
 			Vector2Int delta = to - from;
@@ -76,10 +76,41 @@ namespace pindwin.Game
 			return MoveValidity.Invalid;
 		}
 
-		private MoveValidity CanQueenMoveTo(Tile from, Tile to)
+		private MoveValidity CanQueenMoveTo(Tile from, Tile to, out Tile capturedTile)
 		{
-			//todo implement
-			return MoveValidity.Invalid;
+			capturedTile = Tile.NullTile;
+			Vector2Int delta = to - from;
+			int distance = Mathf.Abs(delta.x);
+			if (distance != Mathf.Abs(delta.y))
+			{
+				return MoveValidity.Invalid;
+			}
+
+			if (distance == 1)
+			{
+				return MoveValidity.Valid;
+			}
+
+			var fromState = _board[from];
+			int xSign = Mathf.RoundToInt(Mathf.Sign(delta.x));
+			int ySign = Mathf.RoundToInt(Mathf.Sign(delta.y));
+
+			for (int i = 2; i < distance; i++)
+			{
+				Tile tile = from + new Vector2Int(i * xSign, i * ySign);
+				TileState tileState = _board[tile];
+				if (tileState.IsEmpty() == false)
+				{
+					if (capturedTile.IsNull == false || tileState.Team() == fromState.Team())
+					{
+						return MoveValidity.Invalid;
+					}
+
+					capturedTile = tile;
+				}
+			}
+
+			return capturedTile.IsNull ? MoveValidity.Valid : MoveValidity.Capture;
 		}
 
 		public void MovePawn(Tile selectedTile, Tile tile)
@@ -89,6 +120,11 @@ namespace pindwin.Game
 			Pawn pawn = Pawns.Find(p => p.Position == selectedTile);
 			Debug.Assert(pawn != null);
 			pawn.Position = tile;
+			if ((tile + new Vector2Int(0, pawn.Team)).IsNull)
+			{
+				_board[tile] |= TileState.Promoted;
+				pawn.IsQueen = true;
+			}
 		}
 		
 		public void Capture(Tile capturedTile)
