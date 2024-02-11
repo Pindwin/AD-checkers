@@ -23,9 +23,9 @@
 			CheckersGame game = gameController.Game;
 			if (tile.IsNull == false)
 			{
-				bool isPlayerTeam = game[tile].Team() == game.PlayerTeam;
-				gameController.SetSelectedTile(tile, isPlayerTeam);
-				if (isPlayerTeam)
+				bool isValidTeam = game[tile].Team() == gameController.CurrentTeam;
+				gameController.SetSelectedTile(tile, isValidTeam);
+				if (isValidTeam)
 				{
 					gameController.GoToState(GameStateType.TargetSelection);
 				}

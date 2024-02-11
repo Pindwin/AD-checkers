@@ -16,20 +16,31 @@ namespace pindwin
         
         private GameState _currentState;
         private CheckersGameFactory _gameFactory;
+        private int _currentPlayer; 
+        public int CurrentTeam => _players[_currentPlayer].Team;
+        private readonly List<IPlayer> _players = new();
         
         private readonly Dictionary<GameStateType, GameState> _states = new()
         {
             { GameStateType.PawnSelection, new PawnSelection() },
-            { GameStateType.TargetSelection, new TargetSelection() },
-            { GameStateType.ComputerTurn, new ComputerTurn() }
+            { GameStateType.TargetSelection, new TargetSelection() }
         };
+
+        private void Awake()
+        {
+            _players.AddRange(new IPlayer[] {
+                new LocalPlayer(TileState.White.Team()), 
+                new AIPlayer(TileState.White.Team() * -1, this)
+            });
+        }
     
         private void Start()
         {
             _gameFactory = new CheckersGameFactory(_pawnPrefab, _boardView, transform);
             Game = _gameFactory.CreateNewGame();
             _boardView.Initialize(OnTileClicked);
-            GoToState(GameStateType.PawnSelection);
+            _currentPlayer = Random.Range(0, _players.Count);
+            _players[_currentPlayer].StartTurn(this);
         }
 
         public void GoToState(GameStateType gameStateType)
@@ -43,7 +54,7 @@ namespace pindwin
             gameState.OnEnter(this);
         }
         
-        private void OnTileClicked(Tile tile)
+        public void OnTileClicked(Tile tile)
         {
             _currentState?.OnTileClicked(this, tile);
         }
@@ -60,6 +71,12 @@ namespace pindwin
             {
                 _boardView.GetTileByBoardCoord(tile.X, tile.Y).Selected = isSelected;
             }
+        }
+
+        public void PassTurn()
+        {
+            _currentPlayer = (_currentPlayer + 1) % _players.Count;
+            _players[_currentPlayer].StartTurn(this);
         }
     }
 }

@@ -22,7 +22,7 @@
 						break;
 					//todo serve capture chain here?
 				}
-				gameController.GoToState(GameStateType.ComputerTurn);
+				gameController.PassTurn();
 				return;
 			}
 			

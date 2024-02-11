@@ -3,7 +3,6 @@
 	public enum GameStateType
 	{
 		PawnSelection,
-		TargetSelection,
-		ComputerTurn
+		TargetSelection
 	}
 }

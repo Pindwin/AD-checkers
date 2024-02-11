@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using pindwin.Game.FSM;
 using pindwin.Pawns;
 using UnityEngine;
 
@@ -13,13 +12,6 @@ namespace pindwin.Game
 		public int PlayerTeam { get; } = TileState.White.Team();
 		
 		public TileState this[Tile tile] => _board[tile];
-
-		private Dictionary<GameStateType, GameState> _states = new()
-		{
-			{ GameStateType.PawnSelection, new PawnSelection() },
-			{ GameStateType.TargetSelection, new TargetSelection() },
-			{ GameStateType.ComputerTurn, new ComputerTurn() }
-		};
 
 		public CheckersGame(TileState[] gameState)
 		{
