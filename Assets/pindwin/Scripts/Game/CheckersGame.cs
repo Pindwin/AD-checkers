@@ -7,16 +7,18 @@ namespace pindwin.Game
 {
 	public class CheckersGame
 	{
-		private TileState[] _board;
+		private readonly TileState[] _board;
 		public Tile SelectedTile { get; private set; } = Tile.NullTile;
 		public List<Pawn> Pawns { get; private set; } = new();
 		public int PlayerTeam { get; } = TileState.White.Team();
+		
+		public TileState this[Tile tile] => _board[tile];
 
 		private Dictionary<GameStateType, GameState> _states = new()
 		{
 			{ GameStateType.PawnSelection, new PawnSelection() },
 			{ GameStateType.TargetSelection, new TargetSelection() },
-			{ GameStateType.Waiting, new Waiting() }
+			{ GameStateType.ComputerTurn, new ComputerTurn() }
 		};
 
 		public CheckersGame(TileState[] gameState)
@@ -79,8 +81,6 @@ namespace pindwin.Game
 			//todo implement
 			return MoveValidity.Invalid;
 		}
-		
-		public TileState this[Tile tile] => _board[tile];
 
 		public void MovePawn(Tile selectedTile, Tile tile)
 		{
@@ -89,6 +89,83 @@ namespace pindwin.Game
 			Pawn pawn = Pawns.Find(p => p.Position == selectedTile);
 			Debug.Assert(pawn != null);
 			pawn.Position = tile;
+		}
+		
+		public void Capture(Tile capturedTile)
+		{
+			_board[capturedTile] = TileState.Empty;
+			Pawn pawn = Pawns.Find(p => p.Position == capturedTile);
+			Debug.Assert(pawn != null);
+			pawn.IsDead = true;
+			pawn.Position = Tile.NullTile;
+			Pawns.Remove(pawn);
+		}
+		
+		public void GetAllPossibleMoves(List<PossibleMove> moves, List<PossibleCapture> captures, int team)
+		{
+			foreach (Pawn pawn in Pawns)
+			{
+				if (pawn.Team != team)
+				{
+					continue;
+				}
+				
+				GetPossibleMoves(pawn.Position, moves, captures);
+			}
+		}
+
+		public void GetPossibleMoves(Tile from, List<PossibleMove> moves, List<PossibleCapture> captures)
+		{
+			TileState state = _board[from];
+			
+			if (state == TileState.Empty)
+			{
+				return;
+			}
+
+			int maxRange = state.IsQueen() ? 8 : 2;
+			Tile captureTile = Tile.NullTile;
+			GetMovesInDirection(-1, 1);
+			GetMovesInDirection(1, 1);
+			//GetMovesInDirection(-1, -1, false);
+			//GetMovesInDirection(1, -1, false);
+			return;
+
+			void GetMovesInDirection(int horizontalDirection, int verticalDirection, bool allowNonCaptures = true)
+			{
+				for (int i = horizontalDirection; Mathf.Abs(i) <= maxRange; i += horizontalDirection)
+				{
+					Tile to = from + new Vector2Int(i, i * state.Team() * verticalDirection);
+					if (to.IsNull)
+					{
+						break;
+					}
+
+					if (_board[to].IsEmpty())
+					{
+						if (captureTile.IsNull)
+						{
+							if (allowNonCaptures && Mathf.Abs(i) < maxRange)
+							{
+								moves.Add(new PossibleMove(from, to));
+							}
+						}
+						else
+						{
+							captures.Add(new PossibleCapture(from, to, captureTile, false));
+							//todo establish follow ups
+						}
+					}
+					else if (captureTile.IsNull && _board[to].Team() != state.Team())
+					{
+						captureTile = to;
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
 		}
 	}
 }

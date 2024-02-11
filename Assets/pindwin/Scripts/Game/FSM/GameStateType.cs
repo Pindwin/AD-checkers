@@ -4,6 +4,6 @@
 	{
 		PawnSelection,
 		TargetSelection,
-		Waiting
+		ComputerTurn
 	}
 }

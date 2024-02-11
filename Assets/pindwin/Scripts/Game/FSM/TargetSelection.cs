@@ -23,11 +23,11 @@ namespace pindwin.Game.FSM
 						break;
 					case MoveValidity.Capture:
 						gameController.Game.MovePawn(selectedTile, tile);
-						//gameController.Game.Capture(capturedTile);
-						//gameController.GoToState(GameStateType.TargetSelection);
+						gameController.Game.Capture(capturedTile);
 						break;
+					//todo serve capture chain here?
 				}
-				gameController.GoToState(GameStateType.Waiting);
+				gameController.GoToState(GameStateType.ComputerTurn);
 				return;
 			}
 			

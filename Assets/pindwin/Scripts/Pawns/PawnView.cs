@@ -20,6 +20,7 @@ namespace pindwin.Pawns
 		{
 			transform.position = boardView.GetTileByBoardCoord(pawn.Position.X, pawn.Position.Y).transform.position;
 			_spriteRenderer.sprite = pawn.IsWhite ? _whiteSprite : _blackSprite;
+			gameObject.SetActive(pawn.IsDead == false);
 			//todo set queen sprite
 		}
 	}

@@ -21,7 +21,7 @@ namespace pindwin
         {
             { GameStateType.PawnSelection, new PawnSelection() },
             { GameStateType.TargetSelection, new TargetSelection() },
-            { GameStateType.Waiting, new Waiting() }
+            { GameStateType.ComputerTurn, new ComputerTurn() }
         };
     
         private void Start()

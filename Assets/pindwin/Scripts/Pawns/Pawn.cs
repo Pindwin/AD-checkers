@@ -9,10 +9,21 @@ namespace pindwin.Pawns
 		private readonly PawnView _pawnView;
 		private readonly BoardView _boardView;
 		private Tile _position;
+		private bool _isDead;
 
 		public int Team { get; }
 		public bool IsQueen { get; set; }
-		public bool IsDead { get; set; }
+
+		public bool IsDead
+		{
+			get => _isDead;
+			set
+			{
+				_isDead = value;
+				_pawnView.Refresh(this, _boardView);
+			}
+		}
+
 		public bool IsWhite => Team == TileState.White.Team();
 
 		public Tile Position
@@ -21,6 +32,11 @@ namespace pindwin.Pawns
 			set
 			{
 				_position = value;
+				if (_position.IsNull)
+				{
+					return;
+				}
+				
 				_pawnView.Refresh(this, _boardView);
 			}
 		}
