@@ -1,4 +1,6 @@
-﻿namespace pindwin.Game.FSM
+﻿using pindwin.Board;
+
+namespace pindwin.States
 {
 	public abstract class GameState
 	{

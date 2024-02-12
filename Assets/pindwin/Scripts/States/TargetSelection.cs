@@ -1,4 +1,7 @@
-﻿namespace pindwin.Game.FSM
+﻿using pindwin.Board;
+using pindwin.Moves;
+
+namespace pindwin.States
 {
 	public class TargetSelection : GameState
 	{
@@ -7,8 +10,8 @@
 
 		public override void OnTileClicked(CheckersGameController gameController, Tile tile)
 		{
-			Tile selectedTile = gameController.Board.SelectedTile;
-			MoveValidity validity = gameController.Board.IsMoveValid(selectedTile, tile, out Tile capturedTile);
+			Tile selectedTile = gameController.SelectedTile;
+			MoveValidity validity = gameController.IsMoveValid(selectedTile, tile, out Tile capturedTile);
 			if (validity != MoveValidity.Invalid)
 			{
 				switch (validity)
@@ -47,7 +50,7 @@
 			var buffer = gameController.PossibleMovesBuffer;
 			buffer.Clear();
 			bool foundKill = false;
-			gameController.Board.GetAllPossibleMoves(buffer, gameController.CurrentTeam, ref foundKill);
+			gameController.GetAllPossibleMoves(buffer, gameController.CurrentTeam, ref foundKill);
 			return foundKill;
 		}
 
@@ -56,7 +59,7 @@
 			var buffer = gameController.PossibleMovesBuffer;
 			buffer.Clear();
 			bool canContinue = false;
-			gameController.Board.GetPossibleMoves(fromTile, buffer, ref canContinue);
+			gameController.GetPossibleMoves(fromTile, buffer, ref canContinue);
 			return canContinue;
 		}
 	}

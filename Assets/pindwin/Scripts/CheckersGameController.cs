@@ -1,32 +1,33 @@
 using System.Collections.Generic;
 using pindwin.Board;
-using pindwin.Game;
-using pindwin.Game.FSM;
+using pindwin.Board.View;
+using pindwin.Moves;
 using pindwin.Pawns;
+using pindwin.Player;
+using pindwin.States;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace pindwin
 {
-    public class CheckersGameController : MonoBehaviour
+    public class CheckersGameController : MonoBehaviour, IPossibleMoveSource
     {
         [SerializeField] private BoardView _boardView;
         [SerializeField] private PawnView _pawnPrefab;
         
-        public CheckersBoard Board { get; private set; }
-        public List<Pawn> Pawns { get; private set; } = new();
-        
-        private GameState _currentState;
-        private CheckersGameFactory _gameFactory;
-        private int _currentPlayer;
-        private int _localTeam = TileState.White.Team();
+        private CheckersBoard Board { get; set; }
+        public Tile SelectedTile { get; private set; } = Tile.NullTile;
         public int CurrentTeam => _players[_currentPlayer].Team;
+        public int LocalTeam { get; } = TileState.White.Team();
         public List<PossibleMove> PossibleMovesBuffer { get; } = new();
         public bool IsMidCombo { get; set; }
-        public Stack<RecordedMove> MovesHistory { get; } = new();
-
-        private readonly List<IPlayer> _players = new();
         
+        private GameState _currentState;
+        private int _currentPlayer;
+        
+        private readonly List<Pawn> _pawns = new();
+        private readonly Stack<RecordedMove> _movesHistory = new();
+        private readonly List<IPlayer> _players = new();
         private readonly Dictionary<GameStateType, GameState> _states = new()
         {
             { GameStateType.PawnSelection, new PawnSelection() },
@@ -36,12 +37,12 @@ namespace pindwin
         private void Start()
         {
             _players.AddRange(new IPlayer[] {
-                new LocalPlayer(_localTeam), 
-                new AIPlayer(_localTeam * -1, this)
+                new LocalPlayer(LocalTeam), 
+                new AIPlayer(LocalTeam * -1, this)
             });
             
-            _gameFactory = new CheckersGameFactory(_pawnPrefab, _boardView, transform);
-            Board = _gameFactory.CreateNewGame(Pawns);
+            var gameFactory = new CheckersGameFactory(_pawnPrefab, _boardView, transform);
+            Board = gameFactory.SetupBoard(_pawns);
             _boardView.Initialize(OnTileClicked);
             _currentPlayer = Random.Range(0, _players.Count);
             _players[_currentPlayer].StartTurn(this);
@@ -65,21 +66,25 @@ namespace pindwin
 
         public void SetSelectedTile(Tile tile, bool isSelected)
         {
-            if (Board.SelectedTile.IsValid)
+            if (SelectedTile.IsValid)
             {
-                Tile t = Board.SelectedTile;
-                _boardView.GetTileByBoardCoord(t.X, t.Y).Selected = false;
+                _boardView.GetTileByBoardCoord(SelectedTile.X, SelectedTile.Y).Selected = false;
             }
-            Board.SetSelectedTile(tile, isSelected);
-            if (tile.IsValid)
+            SelectedTile = tile;
+            if (SelectedTile.IsValid)
             {
                 _boardView.GetTileByBoardCoord(tile.X, tile.Y).Selected = isSelected;
             }
         }
+
+        public TileState GetStateByTile(Tile tile)
+        {
+            return Board[tile];
+        }
         
         public void CommitMove(Tile from, Tile to, Tile capturedTile)
         {
-            MovesHistory.Push(
+            _movesHistory.Push(
                 new RecordedMove(
                     CurrentTeam, 
                     Board[from], 
@@ -96,45 +101,7 @@ namespace pindwin
                 KillPawn(capturedTile);
             }
         }
-
-        private void UpdatePawn(Tile from, Tile to, TileState resultingState)
-        {
-            Pawn pawn = Pawns.Find(p => p.Position == from);
-            pawn.Position = to;
-            pawn.IsQueen = resultingState.IsQueen();
-        }
         
-        private void KillPawn(Tile capturedTile)
-        {
-            Pawn pawn = Pawns.Find(p => p.Position == capturedTile);
-            Pawns.Remove(pawn);
-            pawn.IsDead = true;
-            pawn.Position = Tile.NullTile;
-        }
-
-        private void SpawnPawn(Tile position, TileState state)
-        {
-            Pawns.Add(new Pawn(state, position, _pawnPrefab, _boardView, transform));
-        }
-
-        public void UndoLastMove()
-        {
-            if (MovesHistory.Count == 0)
-            {
-                return;
-            }
-
-            RecordedMove move = MovesHistory.Pop();
-            Board.MakeMove(move.To, move.From);
-            Board.ForceState(move.From, move.OriginalState);
-            UpdatePawn(move.To, move.From, move.OriginalState);
-            if (move.Capture.IsValid)
-            {
-                Board.ForceState(move.Capture, move.CaptureState);
-                SpawnPawn(move.Capture, move.CaptureState);
-            }
-        }
-
         public void PassTurn()
         {
             _currentPlayer = (_currentPlayer + 1) % _players.Count;
@@ -148,7 +115,7 @@ namespace pindwin
 
         public void OnUndoClicked()
         {
-            if (CurrentTeam != _localTeam)
+            if (CurrentTeam != LocalTeam)
             {
                 return;
             }
@@ -157,9 +124,9 @@ namespace pindwin
             bool reversedLastTurn = false;
             IsMidCombo = false;
             
-            while (MovesHistory.Count > 0)
+            while (_movesHistory.Count > 0)
             {
-                RecordedMove move = MovesHistory.Peek();
+                RecordedMove move = _movesHistory.Peek();
                 if (move.Team != CurrentTeam)
                 {
                     if (reversedLastTurn)
@@ -178,5 +145,65 @@ namespace pindwin
             
             _players[_currentPlayer].StartTurn(this);
         }
+        
+        private void UndoLastMove()
+        {
+            if (_movesHistory.Count == 0)
+            {
+                return;
+            }
+
+            RecordedMove move = _movesHistory.Pop();
+            Board.MakeMove(move.To, move.From);
+            Board.ForceState(move.From, move.OriginalState);
+            UpdatePawn(move.To, move.From, move.OriginalState);
+            if (move.Capture.IsValid)
+            {
+                Board.ForceState(move.Capture, move.CaptureState);
+                SpawnPawn(move.Capture, move.CaptureState);
+            }
+        }
+        
+        private void UpdatePawn(Tile from, Tile to, TileState resultingState)
+        {
+            Pawn pawn = _pawns.Find(p => p.Position == from);
+            pawn.Position = to;
+            pawn.IsQueen = resultingState.IsQueen();
+        }
+        
+        private void KillPawn(Tile capturedTile)
+        {
+            Pawn pawn = _pawns.Find(p => p.Position == capturedTile);
+            _pawns.Remove(pawn);
+            pawn.IsDead = true;
+            pawn.Position = Tile.NullTile;
+        }
+
+        private void SpawnPawn(Tile position, TileState state)
+        {
+            _pawns.Add(new Pawn(state, position, _pawnPrefab, _boardView, transform));
+        }
+
+        #region IPossibleMoveSource delegation
+        public MoveValidity IsMoveValid(Tile from, Tile to, out Tile capturedTile)
+        {
+            return Board.IsMoveValid(from, to, out capturedTile);
+        }
+
+        public void GetAllPossibleMoves(List<PossibleMove> possibleMoves, int team)
+        {
+            Board.GetAllPossibleMoves(possibleMoves, team);
+        }
+
+        public void GetAllPossibleMoves(List<PossibleMove> possibleMoves, int team, ref bool kill)
+        {
+            Board.GetAllPossibleMoves(possibleMoves, team, ref kill);
+        }
+
+        public void GetPossibleMoves(Tile origin, List<PossibleMove> moves, ref bool kill)
+        {
+            Board.GetPossibleMoves(origin, moves, ref kill);
+        }
+        #endregion
     }
 }

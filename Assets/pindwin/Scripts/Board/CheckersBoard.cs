@@ -1,34 +1,18 @@
 ﻿using System.Collections.Generic;
-using pindwin.Pawns;
+using pindwin.Moves;
 using UnityEngine;
 
-namespace pindwin.Game
+namespace pindwin.Board
 {
-	public class CheckersBoard
+	public class CheckersBoard : IPossibleMoveSource
 	{
-		private readonly TileState[] _board;
-		public Tile SelectedTile { get; private set; } = Tile.NullTile;
-		public int PlayerTeam { get; } = TileState.White.Team();
-		
-		public TileState this[Tile tile] => _board[tile];
+		private readonly TileState[] _tileStates;
+		public TileState this[Tile tile] => _tileStates[tile];
 
 		public CheckersBoard(TileState[] gameState)
 		{
 			Debug.Assert(gameState.Length == 64);
-			_board = gameState;
-		}
-
-		public void SetSelectedTile(Tile tile, bool isSelected)
-		{
-			if (SelectedTile.IsValid)
-			{
-				_board[SelectedTile] &= ~TileState.Selected;
-			}
-			SelectedTile = isSelected ? tile : Tile.NullTile;
-			if (SelectedTile.IsValid)
-			{
-				_board[SelectedTile] |= TileState.Selected;
-			}
+			_tileStates = gameState;
 		}
 		
 		public MoveValidity IsMoveValid(Tile from, Tile to, out Tile capturedTile)
@@ -39,7 +23,7 @@ namespace pindwin.Game
 				return MoveValidity.Invalid;
 			}
 			
-			if (_board[to].IsEmpty() == false)
+			if (_tileStates[to].IsEmpty() == false)
 			{
 				return MoveValidity.Invalid;
 			}
@@ -56,7 +40,7 @@ namespace pindwin.Game
 				return MoveValidity.Valid;
 			}
 			
-			TileState fromState = _board[from];
+			TileState fromState = _tileStates[from];
 			int moveRange = fromState.IsQueen() ? 8 : 2;
 			if (distance > moveRange)
 			{
@@ -69,7 +53,7 @@ namespace pindwin.Game
 			for (int i = 1; i < distance; i++)
 			{
 				Tile tile = from + new Vector2Int(i * xSign, i * ySign);
-				TileState tileState = _board[tile];
+				TileState tileState = _tileStates[tile];
 				if (tileState.IsEmpty() == false)
 				{
 					if (capturedTile.IsValid || tileState.Team() == fromState.Team())
@@ -91,15 +75,15 @@ namespace pindwin.Game
 				return TileState.Empty;
 			}
 			
-			int team = _board[from].Team();
-			_board[to] = _board[from];
-			_board[from] = TileState.Empty;
+			int team = _tileStates[from].Team();
+			_tileStates[to] = _tileStates[from];
+			_tileStates[from] = TileState.Empty;
 			if ((to + new Vector2Int(0, team)).IsNull)
 			{
-				_board[to] |= TileState.Promoted;
+				_tileStates[to] |= TileState.Promoted;
 			}
 
-			return _board[to];
+			return _tileStates[to];
 		}
 		
 		public bool Capture(Tile capturedTile)
@@ -109,13 +93,13 @@ namespace pindwin.Game
 				return false;
 			}
 			
-			_board[capturedTile] = TileState.Empty;
+			_tileStates[capturedTile] = TileState.Empty;
 			return true;
 		}
 
 		public void ForceState(Tile position, TileState state)
 		{
-			_board[position] = state;
+			_tileStates[position] = state;
 		}
 		
 		public void GetAllPossibleMoves(List<PossibleMove> possibleMoves, int team)
@@ -126,9 +110,9 @@ namespace pindwin.Game
 		
 		public void GetAllPossibleMoves(List<PossibleMove> possibleMoves, int team, ref bool kill)
 		{
-			for (int i = 0; i < _board.Length; i++)
+			for (int i = 0; i < _tileStates.Length; i++)
 			{
-				TileState tileState = _board[i];
+				TileState tileState = _tileStates[i];
 				if (tileState.IsEmpty() || tileState.Team() != team)
 				{
 					continue;
@@ -140,7 +124,7 @@ namespace pindwin.Game
 
 		public void GetPossibleMoves(Tile origin, List<PossibleMove> moves, ref bool kill)
 		{
-			TileState state = _board[origin];
+			TileState state = _tileStates[origin];
 			
 			if (state == TileState.Empty)
 			{
@@ -176,7 +160,7 @@ namespace pindwin.Game
 					break;
 				}
 
-				if (_board[to].IsEmpty())
+				if (_tileStates[to].IsEmpty())
 				{
 					if (captureTile.IsNull)
 					{
@@ -192,7 +176,7 @@ namespace pindwin.Game
 							continue;
 						}
 							
-						moves.Add(new PossibleMove(origin, to, Tile.NullTile, false));
+						moves.Add(new PossibleMove(origin, to));
 					}
 					else
 					{
@@ -202,13 +186,12 @@ namespace pindwin.Game
 							moves.Clear();
 							foundCapture = true;
 						}
-						moves.Add(new PossibleMove(origin, to, captureTile, false));
-						//todo establish follow ups
+						moves.Add(new PossibleMove(origin, to));
 					}
 					continue;
 				}
 					
-				if (captureTile.IsNull && _board[to].Team() != team)
+				if (captureTile.IsNull && _tileStates[to].Team() != team)
 				{
 					//first enemy piece found - it's a potential capture
 					captureTile = to;

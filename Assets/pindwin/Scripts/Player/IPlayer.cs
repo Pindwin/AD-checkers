@@ -1,4 +1,4 @@
-﻿namespace pindwin
+﻿namespace pindwin.Player
 {
 	public interface IPlayer
 	{

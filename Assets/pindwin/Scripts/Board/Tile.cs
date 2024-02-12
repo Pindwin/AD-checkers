@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace pindwin.Game
+namespace pindwin.Board
 {
 	public readonly struct Tile : IEquatable<Tile>
 	{
@@ -36,8 +36,8 @@ namespace pindwin.Game
 		}
 		
 		public static implicit operator int(Tile t) => t.Y * 8 + t.X;
-		public static implicit operator Tile(int i) => new Tile(i % 8, i / 8);
-		public static Vector2Int operator -(Tile a, Tile b) => new Vector2Int(a.X - b.X, a.Y - b.Y);
-		public static Tile operator +(Tile a, Vector2Int b) => new Tile(a.X + b.x, a.Y + b.y);
+		public static implicit operator Tile(int i) => new (i % 8, i / 8);
+		public static Vector2Int operator -(Tile a, Tile b) => new (a.X - b.X, a.Y - b.Y);
+		public static Tile operator +(Tile a, Vector2Int b) => new (a.X + b.x, a.Y + b.y);
 	}
 }

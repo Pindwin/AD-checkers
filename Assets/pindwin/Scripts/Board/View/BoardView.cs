@@ -1,8 +1,7 @@
 ﻿using System;
-using pindwin.Game;
 using UnityEngine;
 
-namespace pindwin.Board
+namespace pindwin.Board.View
 {
 	public class BoardView : MonoBehaviour
 	{

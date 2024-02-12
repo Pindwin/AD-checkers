@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using pindwin.Board;
+using pindwin.Board.View;
 using UnityEngine;
 
 namespace pindwin.Pawns
@@ -20,29 +20,32 @@ namespace pindwin.Pawns
 
 		public void Refresh(Pawn pawn, BoardView boardView)
 		{
+			if (pawn.IsDead)
+			{
+				Destroy(gameObject);
+				return;
+			}
+			
 			Vector3 target = boardView.GetTileByBoardCoord(pawn.Position.X, pawn.Position.Y).transform.position;
-			gameObject.SetActive(pawn.IsDead == false);
 			_spriteRenderer.sprite = pawn.IsWhite ? _whiteSprite : _blackSprite;
 			_queenSpriteRenderer.enabled = pawn.IsQueen;
 			if (transform.position != target && pawn.IsDead == false)
 			{
-				StartCoroutine(MovePawn(target, 4.0f));
+				StartCoroutine(MovePawn(target, 0.25f));
 			}
-
-			//todo set queen sprite
 		}
 
-		IEnumerator MovePawn(Vector3 target, float speed)
+		IEnumerator MovePawn(Vector3 target, float duration)
 		{
 			Vector3 startPosition = transform.position;
 			float time = 0.0f;
 
 			_spriteRenderer.sortingOrder += 1;
 			_queenSpriteRenderer.sortingOrder += 1;
-			while (time < 1.0f)
+			while (time < duration)
 			{
-				time += Time.deltaTime * speed;
-				transform.position = Vector3.Lerp(startPosition, target, time);
+				time += Time.deltaTime;
+				transform.position = Vector3.Lerp(startPosition, target, time / duration);
 				yield return null;
 			}
 			_spriteRenderer.sortingOrder -= 1;

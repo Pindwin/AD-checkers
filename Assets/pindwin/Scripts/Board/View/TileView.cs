@@ -1,8 +1,7 @@
 ﻿using System;
-using pindwin.Game;
 using UnityEngine;
 
-namespace pindwin.Board
+namespace pindwin.Board.View
 {
 	[RequireComponent(typeof(SpriteRenderer))]
 	public class TileView : MonoBehaviour
@@ -12,7 +11,6 @@ namespace pindwin.Board
 		private SpriteRenderer _spriteRenderer;
 		private Action<Tile> _clickTileCommand;
 		private Tile _boardCoord;
-		public Vector2Int BoardCoord;
 
 		public bool Selected
 		{
@@ -28,7 +26,6 @@ namespace pindwin.Board
 		{
 			_boardCoord = boardCoord;
 			_clickTileCommand = clickTileCommand;
-			BoardCoord = new Vector2Int(boardCoord.X, boardCoord.Y);
 		}
 		
 		public void OnMouseDown()

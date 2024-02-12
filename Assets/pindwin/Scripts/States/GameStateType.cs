@@ -1,4 +1,4 @@
-﻿namespace pindwin.Game.FSM
+﻿namespace pindwin.States
 {
 	public enum GameStateType
 	{

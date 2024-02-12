@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using pindwin.Board;
+using pindwin.Board.View;
 using pindwin.Pawns;
 using UnityEngine;
 
-namespace pindwin.Game
+namespace pindwin
 {
 	public class CheckersGameFactory
 	{
@@ -18,7 +19,7 @@ namespace pindwin.Game
 			_pawnsRoot = pawnsRoot;
 		}
 		
-		public CheckersBoard CreateNewGame(List<Pawn> pawns)
+		public CheckersBoard SetupBoard(List<Pawn> pawns)
 		{
 			var gameState = new TileState[64];
 			pawns.Clear();

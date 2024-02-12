@@ -1,5 +1,5 @@
 ﻿using pindwin.Board;
-using pindwin.Game;
+using pindwin.Board.View;
 using UnityEngine;
 
 namespace pindwin.Pawns
@@ -8,11 +8,11 @@ namespace pindwin.Pawns
 	{
 		private readonly PawnView _pawnView;
 		private readonly BoardView _boardView;
+		private readonly int _team;
+		
 		private Tile _position;
 		private bool _isDead;
 		private bool _isQueen;
-
-		public int Team { get; }
 
 		public bool IsQueen
 		{
@@ -34,7 +34,7 @@ namespace pindwin.Pawns
 			}
 		}
 
-		public bool IsWhite => Team == TileState.White.Team();
+		public bool IsWhite => _team == TileState.White.Team();
 
 		public Tile Position
 		{
@@ -58,9 +58,10 @@ namespace pindwin.Pawns
 			
 			_pawnView = Object.Instantiate(pawnPrefab.gameObject, root).GetComponent<PawnView>();
 			
-			Team = state.Team();
-			IsQueen = state.IsQueen();
-			Position = position;
+			_team = state.Team();
+			_isQueen = state.IsQueen();
+			_position = position;
+			_pawnView.Refresh(this, _boardView);
 		}
 	}
 }

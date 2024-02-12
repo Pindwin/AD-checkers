@@ -1,6 +1,6 @@
-﻿using pindwin.Game.FSM;
+﻿using pindwin.States;
 
-namespace pindwin
+namespace pindwin.Player
 {
 	public class LocalPlayer : IPlayer
 	{

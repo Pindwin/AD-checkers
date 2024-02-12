@@ -1,4 +1,4 @@
-﻿namespace pindwin.Game
+﻿namespace pindwin.Moves
 {
 	public enum MoveValidity
 	{

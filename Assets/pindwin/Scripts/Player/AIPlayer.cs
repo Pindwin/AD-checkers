@@ -1,38 +1,38 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using pindwin.Game;
-using pindwin.Game.FSM;
+using pindwin.Board;
+using pindwin.Moves;
+using pindwin.States;
 using UnityEngine;
 
-namespace pindwin
+namespace pindwin.Player
 {
 	public class AIPlayer : IPlayer
 	{
+		public int Team { get; }
+		
+		private readonly MonoBehaviour _coroutineRunner;
+		
 		public AIPlayer(int team, MonoBehaviour coroutineRunner)
 		{
 			Team = team;
 			_coroutineRunner = coroutineRunner;
 		}
-
-		public int Team { get; }
-		
-		private readonly MonoBehaviour _coroutineRunner;
 		
 		public void StartTurn(CheckersGameController gameController)
 		{
-			gameController.SetSelectedTile(gameController.Board.SelectedTile, false);
+			gameController.SetSelectedTile(gameController.SelectedTile, false);
 			List<PossibleMove> moves = gameController.PossibleMovesBuffer;
 			moves.Clear();
-			gameController.Board.GetAllPossibleMoves(moves, gameController.Board.PlayerTeam * -1);
+			gameController.GetAllPossibleMoves(moves, gameController.LocalTeam * -1);
 			if (moves.Count > 0)
 			{
-				PossibleMove capture = moves[Random.Range(0, moves.Count)];
-				_coroutineRunner.StartCoroutine(PlayTurn(capture.From, capture.To, gameController));
+				PossibleMove move = moves[Random.Range(0, moves.Count)];
+				_coroutineRunner.StartCoroutine(PlayTurn(move.From, move.To, gameController));
+				return;
 			}
-			else
-			{
-				Debug.Log("Game ended - player won!");
-			}
+			
+			Debug.Log("Game ended - player won!");
 		}
 
 		private IEnumerator PlayTurn(Tile from, Tile to, CheckersGameController gameController)
@@ -45,7 +45,7 @@ namespace pindwin
 			{
 				List<PossibleMove> moves = gameController.PossibleMovesBuffer;
 				bool killsOnly = true;
-				gameController.Board.GetPossibleMoves(to, moves, ref killsOnly);
+				gameController.GetPossibleMoves(to, moves, ref killsOnly);
 				if (moves.Count > 0)
 				{
 					PossibleMove capture = moves[Random.Range(0, moves.Count)];

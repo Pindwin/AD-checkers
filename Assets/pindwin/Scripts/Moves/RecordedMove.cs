@@ -1,4 +1,6 @@
-﻿namespace pindwin.Game
+﻿using pindwin.Board;
+
+namespace pindwin.Moves
 {
 	public readonly struct RecordedMove
 	{

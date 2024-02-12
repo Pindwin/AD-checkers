@@ -1,15 +1,17 @@
-﻿namespace pindwin.Game.FSM
+﻿using pindwin.Board;
+
+namespace pindwin.States
 {
 	public class PawnSelection : GameState
 	{
 		public override void OnEnter(CheckersGameController gameController)
 		{
-			TryGoToTargetSelection(gameController, gameController.Board.SelectedTile);
+			TryGoToTargetSelection(gameController, gameController.SelectedTile);
 		}
 
 		public override void OnTileClicked(CheckersGameController gameController, Tile tile)
 		{
-			if (gameController.Board.SelectedTile == tile)
+			if (gameController.SelectedTile == tile)
 			{
 				gameController.SetSelectedTile(tile, false);
 				return;
@@ -20,15 +22,16 @@
 
 		private static void TryGoToTargetSelection(CheckersGameController gameController, Tile tile)
 		{
-			CheckersBoard board = gameController.Board;
-			if (tile.IsValid)
+			if (tile.IsNull)
 			{
-				bool isValidTeam = board[tile].Team() == gameController.CurrentTeam;
-				gameController.SetSelectedTile(tile, isValidTeam);
-				if (isValidTeam)
-				{
-					gameController.GoToState(GameStateType.TargetSelection);
-				}
+				return;
+			}
+
+			bool isValidTeam = gameController.GetStateByTile(tile).Team() == gameController.CurrentTeam;
+			gameController.SetSelectedTile(tile, isValidTeam);
+			if (isValidTeam)
+			{
+				gameController.GoToState(GameStateType.TargetSelection);
 			}
 		}
 	}
