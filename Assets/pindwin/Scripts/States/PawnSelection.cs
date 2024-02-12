@@ -16,7 +16,7 @@ namespace pindwin.States
 				gameController.SetSelectedTile(tile, false);
 				return;
 			}
-			
+
 			TryGoToTargetSelection(gameController, tile);
 		}
 

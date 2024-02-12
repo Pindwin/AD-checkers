@@ -10,7 +10,7 @@ namespace pindwin.Pawns
 		[SerializeField] private Sprite _whiteSprite;
 		[SerializeField] private Sprite _blackSprite;
 		[SerializeField] private SpriteRenderer _queenSpriteRenderer;
-		
+
 		SpriteRenderer _spriteRenderer;
 
 		private void Awake()
@@ -25,7 +25,7 @@ namespace pindwin.Pawns
 				Destroy(gameObject);
 				return;
 			}
-			
+
 			Vector3 target = boardView.GetTileByBoardCoord(pawn.Position.X, pawn.Position.Y).transform.position;
 			_spriteRenderer.sprite = pawn.IsWhite ? _whiteSprite : _blackSprite;
 			_queenSpriteRenderer.enabled = pawn.IsQueen;
@@ -48,6 +48,7 @@ namespace pindwin.Pawns
 				transform.position = Vector3.Lerp(startPosition, target, time / duration);
 				yield return null;
 			}
+
 			_spriteRenderer.sortingOrder -= 1;
 			_queenSpriteRenderer.sortingOrder -= 1;
 		}

@@ -10,11 +10,11 @@ namespace pindwin.Board
 			X = x;
 			Y = y;
 		}
-		
+
 		public int X { get; }
 		public int Y { get; }
-		
-		public static readonly Tile NullTile = new (-1, -1);
+
+		public static readonly Tile NullTile = new(-1, -1);
 
 		public bool IsNull => X < 0 || Y < 0 || X > 7 || Y > 7;
 		public bool IsValid => IsNull == false;
@@ -34,10 +34,10 @@ namespace pindwin.Board
 		{
 			return HashCode.Combine(X, Y);
 		}
-		
+
 		public static implicit operator int(Tile t) => t.Y * 8 + t.X;
-		public static implicit operator Tile(int i) => new (i % 8, i / 8);
-		public static Vector2Int operator -(Tile a, Tile b) => new (a.X - b.X, a.Y - b.Y);
-		public static Tile operator +(Tile a, Vector2Int b) => new (a.X + b.x, a.Y + b.y);
+		public static implicit operator Tile(int i) => new(i % 8, i / 8);
+		public static Vector2Int operator -(Tile a, Tile b) => new(a.X - b.X, a.Y - b.Y);
+		public static Tile operator +(Tile a, Vector2Int b) => new(a.X + b.x, a.Y + b.y);
 	}
 }

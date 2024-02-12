@@ -9,16 +9,16 @@ namespace pindwin.Player
 {
 	public class AIPlayer : IPlayer
 	{
-		public int Team { get; }
-		
 		private readonly MonoBehaviour _coroutineRunner;
-		
+
 		public AIPlayer(int team, MonoBehaviour coroutineRunner)
 		{
 			Team = team;
 			_coroutineRunner = coroutineRunner;
 		}
-		
+
+		public int Team { get; }
+
 		public void StartTurn(CheckersGameController gameController)
 		{
 			gameController.SetSelectedTile(gameController.SelectedTile, false);
@@ -31,7 +31,7 @@ namespace pindwin.Player
 				_coroutineRunner.StartCoroutine(PlayTurn(move.From, move.To, gameController));
 				return;
 			}
-			
+
 			Debug.Log("Game ended - player won!");
 		}
 

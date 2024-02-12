@@ -5,8 +5,7 @@ namespace pindwin.States
 {
 	public class TargetSelection : GameState
 	{
-		public override void OnEnter(CheckersGameController gameController)
-		{ }
+		public override void OnEnter(CheckersGameController gameController) { }
 
 		public override void OnTileClicked(CheckersGameController gameController, Tile tile)
 		{
@@ -21,6 +20,7 @@ namespace pindwin.States
 						{
 							return;
 						}
+
 						gameController.CommitMove(selectedTile, tile, Tile.NullTile);
 						break;
 					case MoveValidity.Capture:
@@ -32,8 +32,10 @@ namespace pindwin.States
 							gameController.GoToState(GameStateType.PawnSelection);
 							return;
 						}
+
 						break;
 				}
+
 				gameController.PassTurn();
 				return;
 			}
@@ -45,15 +47,6 @@ namespace pindwin.States
 			}
 		}
 
-		private bool CanStartCapture(CheckersGameController gameController)
-		{
-			var buffer = gameController.PossibleMovesBuffer;
-			buffer.Clear();
-			bool foundKill = false;
-			gameController.GetAllPossibleMoves(buffer, gameController.CurrentTeam, ref foundKill);
-			return foundKill;
-		}
-
 		private bool CanContinueCapture(CheckersGameController gameController, Tile fromTile)
 		{
 			var buffer = gameController.PossibleMovesBuffer;
@@ -61,6 +54,15 @@ namespace pindwin.States
 			bool canContinue = false;
 			gameController.GetPossibleMoves(fromTile, buffer, ref canContinue);
 			return canContinue;
+		}
+
+		private bool CanStartCapture(CheckersGameController gameController)
+		{
+			var buffer = gameController.PossibleMovesBuffer;
+			buffer.Clear();
+			bool foundKill = false;
+			gameController.GetAllPossibleMoves(buffer, gameController.CurrentTeam, ref foundKill);
+			return foundKill;
 		}
 	}
 }

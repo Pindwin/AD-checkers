@@ -8,8 +8,8 @@ namespace pindwin
 {
 	public class CheckersGameFactory
 	{
-		private readonly PawnView _pawnPrefab;
 		private readonly BoardView _boardView;
+		private readonly PawnView _pawnPrefab;
 		private readonly Transform _pawnsRoot;
 
 		public CheckersGameFactory(PawnView pawnPrefab, BoardView boardView, Transform pawnsRoot)
@@ -18,7 +18,7 @@ namespace pindwin
 			_boardView = boardView;
 			_pawnsRoot = pawnsRoot;
 		}
-		
+
 		public CheckersBoard SetupBoard(List<Pawn> pawns)
 		{
 			var gameState = new TileState[64];
@@ -38,9 +38,10 @@ namespace pindwin
 							{
 								state |= TileState.White;
 							}
+
 							pawns.Add(new Pawn(state, t, _pawnPrefab, _boardView, _pawnsRoot));
 						}
-						
+
 						gameState[t] = state;
 					}
 				}

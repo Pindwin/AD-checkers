@@ -13,11 +13,11 @@ namespace pindwin.Board
 
 	public static class TileStateExtensions
 	{
-		public static bool IsWhite(this TileState state) => (state & TileState.White) != 0;
 		public static bool IsBlack(this TileState state) => (state & TileState.White) == 0;
-		public static bool IsQueen(this TileState state) => (state & TileState.Promoted) != 0;
 		public static bool IsEmpty(this TileState state) => state == TileState.Empty;
-		
+		public static bool IsQueen(this TileState state) => (state & TileState.Promoted) != 0;
+		public static bool IsWhite(this TileState state) => (state & TileState.White) != 0;
+
 		// team also marks the direction of movement - 1 being up, -1 being down
 		public static int Team(this TileState state) => state.IsWhite() ? 1 : -1;
 	}

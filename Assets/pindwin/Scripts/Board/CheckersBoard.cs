@@ -7,14 +7,69 @@ namespace pindwin.Board
 	public class CheckersBoard : IPossibleMoveSource
 	{
 		private readonly TileState[] _tileStates;
-		public TileState this[Tile tile] => _tileStates[tile];
 
 		public CheckersBoard(TileState[] gameState)
 		{
 			Debug.Assert(gameState.Length == 64);
 			_tileStates = gameState;
 		}
-		
+
+		public TileState this[Tile tile] => _tileStates[tile];
+
+		public bool Capture(Tile capturedTile)
+		{
+			if (capturedTile.IsNull)
+			{
+				return false;
+			}
+
+			_tileStates[capturedTile] = TileState.Empty;
+			return true;
+		}
+
+		public void ForceState(Tile position, TileState state)
+		{
+			_tileStates[position] = state;
+		}
+
+		public void GetAllPossibleMoves(List<PossibleMove> possibleMoves, int team)
+		{
+			bool kill = false;
+			GetAllPossibleMoves(possibleMoves, team, ref kill);
+		}
+
+		public void GetAllPossibleMoves(List<PossibleMove> possibleMoves, int team, ref bool kill)
+		{
+			for (int i = 0; i < _tileStates.Length; i++)
+			{
+				TileState tileState = _tileStates[i];
+				if (tileState.IsEmpty() || tileState.Team() != team)
+				{
+					continue;
+				}
+
+				GetPossibleMoves(i, possibleMoves, ref kill);
+			}
+		}
+
+		public void GetPossibleMoves(Tile origin, List<PossibleMove> moves, ref bool kill)
+		{
+			TileState state = _tileStates[origin];
+
+			if (state == TileState.Empty)
+			{
+				return;
+			}
+
+			int range = state.IsQueen() ? 8 : 2;
+			int team = state.Team();
+			bool isPawn = state.IsQueen() == false;
+			GetMovesInDirection(-1, 1, kill, range, origin, team, ref kill, moves);
+			GetMovesInDirection(1, 1, kill, range, origin, team, ref kill, moves);
+			GetMovesInDirection(-1, -1, kill || isPawn, range, origin, team, ref kill, moves);
+			GetMovesInDirection(1, -1, kill || isPawn, range, origin, team, ref kill, moves);
+		}
+
 		public MoveValidity IsMoveValid(Tile from, Tile to, out Tile capturedTile)
 		{
 			capturedTile = Tile.NullTile;
@@ -22,7 +77,7 @@ namespace pindwin.Board
 			{
 				return MoveValidity.Invalid;
 			}
-			
+
 			if (_tileStates[to].IsEmpty() == false)
 			{
 				return MoveValidity.Invalid;
@@ -39,14 +94,14 @@ namespace pindwin.Board
 			{
 				return MoveValidity.Valid;
 			}
-			
+
 			TileState fromState = _tileStates[from];
 			int moveRange = fromState.IsQueen() ? 8 : 2;
 			if (distance > moveRange)
 			{
 				return MoveValidity.Invalid;
 			}
-			
+
 			int xSign = Mathf.RoundToInt(Mathf.Sign(delta.x));
 			int ySign = Mathf.RoundToInt(Mathf.Sign(delta.y));
 
@@ -74,7 +129,7 @@ namespace pindwin.Board
 			{
 				return TileState.Empty;
 			}
-			
+
 			int team = _tileStates[from].Team();
 			_tileStates[to] = _tileStates[from];
 			_tileStates[from] = TileState.Empty;
@@ -85,69 +140,15 @@ namespace pindwin.Board
 
 			return _tileStates[to];
 		}
-		
-		public bool Capture(Tile capturedTile)
-		{
-			if (capturedTile.IsNull)
-			{
-				return false;
-			}
-			
-			_tileStates[capturedTile] = TileState.Empty;
-			return true;
-		}
-
-		public void ForceState(Tile position, TileState state)
-		{
-			_tileStates[position] = state;
-		}
-		
-		public void GetAllPossibleMoves(List<PossibleMove> possibleMoves, int team)
-		{
-			bool kill = false;
-			GetAllPossibleMoves(possibleMoves, team, ref kill);
-		}
-		
-		public void GetAllPossibleMoves(List<PossibleMove> possibleMoves, int team, ref bool kill)
-		{
-			for (int i = 0; i < _tileStates.Length; i++)
-			{
-				TileState tileState = _tileStates[i];
-				if (tileState.IsEmpty() || tileState.Team() != team)
-				{
-					continue;
-				}
-
-				GetPossibleMoves(i, possibleMoves, ref kill);
-			}
-		}
-
-		public void GetPossibleMoves(Tile origin, List<PossibleMove> moves, ref bool kill)
-		{
-			TileState state = _tileStates[origin];
-			
-			if (state == TileState.Empty)
-			{
-				return;
-			}
-
-			int range = state.IsQueen() ? 8 : 2;
-			int team = state.Team();
-			bool isPawn = state.IsQueen() == false;
-			GetMovesInDirection(-1, 1, kill, range, origin, team, ref kill, moves);
-			GetMovesInDirection(1, 1, kill, range, origin, team, ref kill, moves);
-			GetMovesInDirection(-1, -1, kill || isPawn, range, origin, team, ref kill, moves);
-			GetMovesInDirection(1, -1, kill || isPawn, range, origin, team, ref kill, moves);
-		}
 
 		private void GetMovesInDirection(
-			int yDir, 
-			int xDir, 
-			bool blockNonCaptures, 
-			int maxRange, 
-			Tile origin, 
-			int team, 
-			ref bool foundCapture, 
+			int yDir,
+			int xDir,
+			bool blockNonCaptures,
+			int maxRange,
+			Tile origin,
+			int team,
+			ref bool foundCapture,
 			List<PossibleMove> moves)
 		{
 			Tile captureTile = Tile.NullTile;
@@ -169,13 +170,13 @@ namespace pindwin.Board
 							//only captures allowed at max range
 							break;
 						}
-							
+
 						if (foundCapture || blockNonCaptures)
 						{
 							//not interested in non-captures at this point
 							continue;
 						}
-							
+
 						moves.Add(new PossibleMove(origin, to));
 					}
 					else
@@ -186,18 +187,20 @@ namespace pindwin.Board
 							moves.Clear();
 							foundCapture = true;
 						}
+
 						moves.Add(new PossibleMove(origin, to));
 					}
+
 					continue;
 				}
-					
+
 				if (captureTile.IsNull && _tileStates[to].Team() != team)
 				{
 					//first enemy piece found - it's a potential capture
 					captureTile = to;
 					continue;
 				}
-					
+
 				break;
 			}
 		}

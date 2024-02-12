@@ -7,10 +7,10 @@ namespace pindwin.Board.View
 	public class TileView : MonoBehaviour
 	{
 		[SerializeField] private Color _selectedColor;
-		
-		private SpriteRenderer _spriteRenderer;
-		private Action<Tile> _clickTileCommand;
 		private Tile _boardCoord;
+		private Action<Tile> _clickTileCommand;
+
+		private SpriteRenderer _spriteRenderer;
 
 		public bool Selected
 		{
@@ -22,15 +22,15 @@ namespace pindwin.Board.View
 			_spriteRenderer = GetComponent<SpriteRenderer>();
 		}
 
+		public void OnMouseDown()
+		{
+			_clickTileCommand?.Invoke(_boardCoord);
+		}
+
 		public void Initialize(Tile boardCoord, Action<Tile> clickTileCommand)
 		{
 			_boardCoord = boardCoord;
 			_clickTileCommand = clickTileCommand;
-		}
-		
-		public void OnMouseDown()
-		{
-			_clickTileCommand?.Invoke(_boardCoord);
 		}
 	}
 }

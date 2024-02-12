@@ -13,6 +13,7 @@ namespace pindwin.Moves
 			Capture = capture;
 			CaptureState = captureState;
 		}
+
 		public int Team { get; }
 		public TileState OriginalState { get; }
 		public Tile From { get; }

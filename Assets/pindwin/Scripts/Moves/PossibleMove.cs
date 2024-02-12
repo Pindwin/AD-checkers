@@ -9,7 +9,7 @@ namespace pindwin.Moves
 			From = from;
 			To = to;
 		}
-		
+
 		public Tile From { get; }
 		public Tile To { get; }
 	}
